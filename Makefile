@@ -282,6 +282,7 @@ msieveshared: all $(COMMON_OBJS) $(QS_OBJS) $(NFS_OBJS) $(GPU_OBJS) msieveshared
 
 
 clean:
+	rm *.o *.so
 	cd b40c && make clean WIN=$(WIN) && cd ..
 	rm -f msieve msieve.exe libmsieve.a $(COMMON_OBJS) $(QS_OBJS) \
 		$(NFS_OBJS) $(NFS_GPU_OBJS) $(NFS_NOGPU_OBJS) *.ptx
