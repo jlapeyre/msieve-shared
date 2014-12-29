@@ -1,6 +1,6 @@
 ## shared libmsieve
 
-This is a copy of msieve-1.53. The Makefile is modified,
+This is a copy of msieve-1.52. The Makefile is modified,
 and msieveshared.c is added to allow building a shared
 library. Do 'make msieveshared'.
 
