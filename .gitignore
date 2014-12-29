@@ -1,0 +1,9 @@
+*~
+*.o
+*.no
+*.a
+*.qo
+msieve
+*.so
+*.dat
+*.log

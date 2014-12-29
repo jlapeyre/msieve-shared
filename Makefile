@@ -19,7 +19,7 @@ WIN = 0
 # get overridden by architecture-specific builds)
 CC = gcc
 WARN_FLAGS = -Wall -W
-OPT_FLAGS = -O3 -fomit-frame-pointer -march=core2 \
+OPT_FLAGS = -O3 -fomit-frame-pointer -fPIC -march=native \
 	    -D_FILE_OFFSET_BITS=64 -DNDEBUG -D_LARGEFILE64_SOURCE
 
 # use := instead of = so we only run the following once
@@ -28,15 +28,19 @@ ifeq ($(SVN_VERSION),)
 	SVN_VERSION := unknown
 endif
 
+# May need to include -I flag  if using libecm
+#-I/home/jlapeyre/software_source/factoring/gmp-ecm/ecm-6.4.4
 CFLAGS = $(OPT_FLAGS) $(MACHINE_FLAGS) $(WARN_FLAGS) \
 	 	-DMSIEVE_SVN_VERSION="\"$(SVN_VERSION)\"" \
 		-I. -Iinclude -Ignfs -Ignfs/poly -Ignfs/poly/stage1
+
 
 # tweak the compile flags
 
 ifeq ($(ECM),1)
 	CFLAGS += -DHAVE_GMP_ECM
-	LIBS += -lecm
+	LIBS += -lecm  # Need to tell where to find libecm
+#	LIBS += -L /home/jlapeyre/software_source/factoring/gmp-ecm/ecm-6.4.4/.libs  -lecm
 endif
 ifeq ($(WIN),1)
 	LDFLAGS += -Wl,--large-address-aware
@@ -266,6 +270,16 @@ all: $(COMMON_OBJS) $(QS_OBJS) $(NFS_OBJS) $(GPU_OBJS)
 	ranlib libmsieve.a
 	$(CC) $(CFLAGS) demo.c -o msieve $(LDFLAGS) \
 			libmsieve.a $(LIBS)
+
+SLIB = libsmsieve.so
+
+msieveshared: all $(COMMON_OBJS) $(QS_OBJS) $(NFS_OBJS) $(GPU_OBJS) msieveshared.o
+	$(CC) $(CFLAGS) -shared -Wl,-soname,$(SLIB) -o $(SLIB) msieveshared.o $(LDFLAGS) \
+			libmsieve.a $(LIBS)
+
+#	gcc -Wall -shared -Wl,-soname,libcprimecount.so cprimecount.o -o $(CPLIB) \
+#           -lc -lstdc++ -L../../usr/lib/ -lprimecount -Wl,-rpath,'$(CURDIR)/../../usr/lib'
+
 
 clean:
 	cd b40c && make clean WIN=$(WIN) && cd ..
