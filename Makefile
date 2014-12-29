@@ -277,10 +277,6 @@ msieveshared: all $(COMMON_OBJS) $(QS_OBJS) $(NFS_OBJS) $(GPU_OBJS) msieveshared
 	$(CC) $(CFLAGS) -shared -Wl,-soname,$(SLIB) -o $(SLIB) msieveshared.o $(LDFLAGS) \
 			libmsieve.a $(LIBS)
 
-#	gcc -Wall -shared -Wl,-soname,libcprimecount.so cprimecount.o -o $(CPLIB) \
-#           -lc -lstdc++ -L../../usr/lib/ -lprimecount -Wl,-rpath,'$(CURDIR)/../../usr/lib'
-
-
 clean:
 	rm *.o *.so
 	cd b40c && make clean WIN=$(WIN) && cd ..
