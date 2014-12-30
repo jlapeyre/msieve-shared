@@ -181,7 +181,7 @@ void print_usage(char *progname) {
 }
 
 /*--------------------------------------------------------------------*/
-void factor_integer(char *buf, uint32 flags,
+int factor_integer(char *buf, uint32 flags,
                     char *savefile_name,
 		    char *logfile_name,
 		    char *nfs_fbfile_name,
@@ -212,7 +212,7 @@ void factor_integer(char *buf, uint32 flags,
 		int_start++;
 	}
 	if (*int_start == 0)
-		return;
+          return(0);
 
 	g_curr_factorization = msieve_obj_new(int_start, flags,savefile_name,
                                               logfile_name,
@@ -223,12 +223,12 @@ void factor_integer(char *buf, uint32 flags,
 					nfs_args);
 	if (g_curr_factorization == NULL) {
 		printf("factoring initialization failed\n");
-		return;
+		return(0);
 	}
 	msieve_run(g_curr_factorization);
 	if (!(g_curr_factorization->flags & MSIEVE_FLAG_FACTORIZATION_DONE)) {
 		printf("\ncurrent factorization was interrupted\n");
-		exit(0);
+                return(0);
 	}
 
 	/* If no logging is specified, at least print out the
@@ -277,10 +277,7 @@ void factor_integer(char *buf, uint32 flags,
 	   avoids a race condition in the signal handler */
 
         *saveobj = g_curr_factorization;
- 	/* obj = g_curr_factorization; */
-	/* g_curr_factorization = NULL; */
-	/* if (obj) */
-	/* 	msieve_obj_free(obj); */
+        return(1);
 }
 
 #ifdef WIN32
@@ -377,22 +374,21 @@ int getfactor_integer(char *inputstring, msieve_obj **obj, int innum_threads) {
 #endif
 	}
         
-
-        if (isdigit(buf[0]) || buf[0] == '(' ) {
+        //        if (isdigit(buf[0]) || buf[0] == '(' ) {
           //          msieve_obj *saveobj;
-          factor_integer(buf, flags, savefile_name, 
+        int retval =  factor_integer(buf, flags, savefile_name, 
 				logfile_name, nfs_fbfile_name,
 				&seed1, &seed2,
 				max_relations, 
 				cpu, cache_size1, cache_size2,
 				num_threads, which_gpu,
                          nfs_args, obj);
-        }
+          //        }
 
 #ifdef HAVE_MPI
 	MPI_Finalize();
 #endif
-	return 0;
+	return retval;
 }
 
 /* free the current factorization struct. The following
@@ -407,7 +403,8 @@ void msieve_obj_free_2 (msieve_obj *obj) {
 
 msieve_obj * factor_from_string(char *inum, int num_threads) {
   msieve_obj *obj = NULL;
-  getfactor_integer(inum, &obj, num_threads);
+  int retval = getfactor_integer(inum, &obj, num_threads);
+  if (retval == 0) obj = NULL;
   return obj;
 }
 
