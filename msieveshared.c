@@ -328,7 +328,10 @@ int getfactor_integer(char *inputstring, msieve_obj **obj, int innum_threads) {
 	get_cache_sizes(&cache_size1, &cache_size2);
 	cpu = get_cpu_type();
 
-	if (signal(SIGINT, handle_signal) == SIG_ERR) {
+        typedef void (*sighandler_t)(int);
+        sighandler_t oldsighandler;
+        oldsighandler = signal(SIGINT, handle_signal);
+	if ( oldsighandler  == SIG_ERR) {
 	        printf("could not install handler on SIGINT\n");
 	        return -1;
 	}
@@ -384,7 +387,7 @@ int getfactor_integer(char *inputstring, msieve_obj **obj, int innum_threads) {
 				num_threads, which_gpu,
                          nfs_args, obj);
           //        }
-
+        signal(SIGINT, oldsighandler); // restore old interrupt handler
 #ifdef HAVE_MPI
 	MPI_Finalize();
 #endif
